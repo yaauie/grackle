@@ -219,8 +219,8 @@ module Grackle
           # the id or format from the request path
           endpoint = request.path
           endpoint.sub!(/^\//, '') # remove leading /
-          endpoint.gsub('/', '_') # in case stats doesn't like slashes
-          STATSD.send("simpledaemon.worker.http.grackle.", 1, 'c', false)
+          endpoint.gsub!(/[^\w]+/, '_') # sanitize endpoint string
+          STATSD.send("simpledaemon.worker.http.grackle.#{endpoint}", 1, 'c', false)
         end
         if auto_append_ids
           id = request.params.delete(:id)
