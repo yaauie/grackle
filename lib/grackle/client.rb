@@ -214,6 +214,14 @@ module Grackle
     
     protected
       def call_with_format(format)
+        if Kernel.const_defined?(:STATSD)
+          # do this in call_with_format so we don't have to worry about removing
+          # the id or format from the request path
+          endpoint = request.path
+          endpoint.sub!(/^\//, '') # remove leading /
+          endpoint.gsub!(/[^\w]+/, '_') # sanitize endpoint string
+          STATSD.send("simpledaemon.worker.http.grackle.#{endpoint}", 1, 'c', false)
+        end
         if auto_append_ids
           id = request.params.delete(:id)
           request << "/#{id}" if id
